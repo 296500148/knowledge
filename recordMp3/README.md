@@ -7,5 +7,5 @@
 本demo使用了较高级的语法,请用较新的浏览器打开。
 因为涉及到摄像头和麦克风,所以需要起https的服务
 
-推荐插件:
+推荐插件启动本地服务插件:
 [anywhere](https://www.npmjs.com/package/anywhere)
