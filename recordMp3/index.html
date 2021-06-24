@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>mp3RecordDemo</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
+    integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"
+    integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
+    
+  <script src="./lib/Mp3LameEncoder.min.js"></script>
+  <style>
+    body,html{
+      border: none;
+      padding: 0;
+      margin: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .left{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      height: 100%;
+      width: 50%;
+    }
+    .btn{
+      margin: 20px 0 0;
+    }
+    .conatiner{
+      display: flex;
+      align-items: center;
+      height: 100%;
+      width: 100%;
+      justify-content: center;
+    }
+    .right{
+      width: 50%;
+      height: 100%;
+      border-left: 1px solid #333;
+      text-align: center;
+      overflow: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="conatiner">
+    <div class="container-fluid left">
+      <div id="start" class="btn btn-default">start</div>
+      <div id="stop" class="btn btn-default">stop</div>
+      <div id="play" class="btn btn-default">play</div>
+      <div id="download" class="btn btn-default">download</div>
+    </div>
+    <div id="log" class="right"></div>
+  </div>
+  <script>
+    window.onload = function(){
+      let arrayBuffer = new Uint8Array(0);
+      let audioContext = null;
+      let closed = true;
+      let audiostream = null;
+      let input = null;
+      let scriptNode = null;
+      let encoder = null;
+      const log = document.getElementById("log")
+      console.log = function(s){
+        log.innerHTML += s + "<br/>";
+      }
+      const startdom = document.getElementById("start");
+      const stopdom = document.getElementById("stop");
+      const playdom = document.getElementById("play");
+      const downloaddom = document.getElementById("download");
+      startdom.addEventListener("click", startrecord);
+      stopdom.addEventListener("click", stoprecord);
+      playdom.addEventListener("click", play);
+      downloaddom.addEventListener("click", download);
+      function write(arr) {
+        let na = new Uint8Array(arr.length + arrayBuffer.length);
+        na.set(arrayBuffer);
+        na.set(arr, arrayBuffer.length);
+        arrayBuffer = na;
+        na = null;
+      }
+      function startrecord(){
+        if(!closed) return;
+        closed = false;
+        console.log("start record ......");
+        navigator.getUserMedia({ audio: true, video: false }, function (stream) {
+          audiostream = stream;
+          if(!audioContext) audioContext = new AudioContext();
+          input = audioContext.createMediaStreamSource(stream);
+          scriptNode = audioContext.createScriptProcessor(4096);
+          encoder = new Mp3LameEncoder(48000, 160);
+          scriptNode.addEventListener("audioprocess", (event) => {
+            if (closed) return;
+            encoder.encode([event.inputBuffer.getChannelData(0), event.inputBuffer.getChannelData(1)]);
+            write(encoder.mp3Buffers[encoder.mp3Buffers.length - 1])
+          })
+          input.connect(scriptNode);
+          scriptNode.connect(audioContext.destination);
+        }, console.error)
+      }
+      async function stoprecord(){
+        if(closed) return;
+        console.log("stop record ......");
+        closed = true;
+        audiostream.getAudioTracks()[0].stop();
+        input.disconnect();
+        scriptNode.disconnect();
+      }
+      async function play(){
+        console.log("prepare to play ......");
+        const buffer = arrayBuffer.slice(0);
+        const auidoBuffer = await audioContext.decodeAudioData(buffer.buffer);
+        const source = audioContext.createBufferSource();
+        source.buffer = auidoBuffer;
+        source.connect(audioContext.destination);
+        source.start();
+      }
+      async function download(){
+        console.log("prepare to download ......");
+        const blob = new Blob([arrayBuffer.buffer],{type: "audio/mpeg"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.setAttribute("href",url);
+        a.setAttribute("download","a.mp3");
+        const event = document.createEvent("MouseEvent");
+        event.initMouseEvent("click");
+        a.dispatchEvent(event);
+      } 
+    }
+  </script>
+</body>
+</html>
