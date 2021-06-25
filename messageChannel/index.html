@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MessageChannel</title>
+  <script src="./index.js"></script>
+  <style>
+    *{
+      padding: 0;
+      border: none;
+      margin: 0;
+    }
+    html{
+      height: 100%;
+      width: 100%;
+    }
+    body{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      width: 100%;
+    }
+    .left{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 50%;
+      height: 100%;
+      flex-direction: column;
+    }
+    .right{
+      width: 50%;
+      height: 100%;
+      border-left: 1px solid #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn{
+      line-height: 24px;
+      padding: 5px 10px;
+      border-radius: 8px;
+      border: 2px solid #999;
+      margin: 10px 0;
+      cursor: pointer;
+    }
+    .btn:hover{
+      background: #eee;
+    }
+    #strout{
+      text-align: center;
+      overflow: auto;
+      height: 50%;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="left">
+    <div class="btn" id="Post">Post</div>
+    <div class="btn" id="MessageChannel">messageChannel</div>
+    <div class="btn" id="SetTimeout">setTimeout</div>
+    <div class="btn" id="requestIdleCallback">requestIdleCallback</div>
+    <div class="btn" id="requestAnimationFrame">requestAnimationFrame</div>
+  </div>
+  <div class="right">
+    <div id="strout"></div>
+  </div>
+  <script>
+    var strout = document.getElementById("strout");
+    console.log = function(arg){
+      strout.innerHTML += arg + "<br/>";
+      strout.scrollTop = strout.scrollHeight;
+    }
+    var arr = [
+      ["Post",function(){ window.post()}], 
+      ["MessageChannel", window.startMessageChannel], 
+      ["SetTimeout", window.startSetTimeOut],
+      ["requestIdleCallback", window.setRequestIdleCallback],
+      ["requestAnimationFrame", window.setRequestAnimationFrame],
+    ]
+    arr.forEach(([id,fn]) => {
+      document.getElementById(id).addEventListener("click",fn);
+    });
+    window.startMessageChannel();
+  </script>
+</body>
+</html>
