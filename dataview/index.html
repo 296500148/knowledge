@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DataView</title>
+  <style>
+    *{
+      padding: 0;
+      margin: 0;
+      border: none;
+    }
+    body,html{
+      width: 100%;
+      height: 100%;
+    }
+    #log{
+      width: 100%;
+      height: 100%;
+      outline:2px solid #666;
+      text-align: center;
+      line-height: 24px;
+      font-size: 14px; 
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+  </style>
+</head>
+<body>
+  <div id="log"></div>
+  <script>
+    var log = document.getElementById("log");
+    console.log = function(arg){
+      log.innerHTML += arg + "<br/>";
+    }
+  </script>
+  <script src="./index.js"></script>
+</body>
+</html>
