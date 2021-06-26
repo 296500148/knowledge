@@ -55,6 +55,7 @@
       <div id="stop" class="btn btn-default">stop</div>
       <div id="play" class="btn btn-default">play</div>
       <div id="download" class="btn btn-default">download</div>
+      <div id="clip" class="btn btn-default">clip</div>
     </div>
     <div id="log" class="right"></div>
   </div>
@@ -75,10 +76,12 @@
       const stopdom = document.getElementById("stop");
       const playdom = document.getElementById("play");
       const downloaddom = document.getElementById("download");
+      const clipdom = document.getElementById("clip");
       startdom.addEventListener("click", startrecord);
       stopdom.addEventListener("click", stoprecord);
       playdom.addEventListener("click", play);
       downloaddom.addEventListener("click", download);
+      clipdom.addEventListener("click", clip);
       function write(arr) {
         let na = new Uint8Array(arr.length + arrayBuffer.length);
         na.set(arrayBuffer);
@@ -95,7 +98,7 @@
           if(!audioContext) audioContext = new AudioContext();
           input = audioContext.createMediaStreamSource(stream);
           scriptNode = audioContext.createScriptProcessor(4096);
-          encoder = new Mp3LameEncoder(48000, 160);
+          encoder = new Mp3LameEncoder(44100, 160);
           scriptNode.addEventListener("audioprocess", (event) => {
             if (closed) return;
             encoder.encode([event.inputBuffer.getChannelData(0), event.inputBuffer.getChannelData(1)]);
@@ -116,15 +119,16 @@
       async function play(){
         console.log("prepare to play ......");
         const buffer = arrayBuffer.slice(0);
-        const auidoBuffer = await audioContext.decodeAudioData(buffer.buffer);
+        const audioBuffer = await audioContext.decodeAudioData(buffer.buffer);
         const source = audioContext.createBufferSource();
-        source.buffer = auidoBuffer;
+        source.buffer = audioBuffer;
         source.connect(audioContext.destination);
         source.start();
       }
       async function download(){
         console.log("prepare to download ......");
-        const blob = new Blob([arrayBuffer.buffer],{type: "audio/mpeg"});
+        const buffer = arrayBuffer.slice(0);
+        const blob = new Blob([buffer.buffer],{type: "audio/mpeg"});
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.setAttribute("href",url);
@@ -132,7 +136,30 @@
         const event = document.createEvent("MouseEvent");
         event.initMouseEvent("click");
         a.dispatchEvent(event);
-      } 
+      }
+      async function clip(){
+        if(!closed) await stoprecord();
+        console.log("prepare to clip ......");
+        const buffer = arrayBuffer.slice(0);
+        const audioBuffer = await audioContext.decodeAudioData(buffer.buffer);
+        const channels = audioBuffer.numberOfChannels;
+        const rate = audioBuffer.sampleRate;
+        let duration = window.prompt("audio duration is " + audioBuffer.duration +" , please input clip duration")
+        duration = duration | 0;
+        if(Number.isNaN(duration) || duration > audioBuffer.duration) return console.log("invalid duration : " + duration);
+        const endOffset = rate * duration;
+        const frameCount = endOffset - 0;
+        const newAudioBuffer = audioContext.createBuffer(channels, frameCount, rate);
+        const anotherArray = new Float32Array(frameCount);
+        const offset = 0;
+        for (let channel = 0; channel < channels; channel++) {
+          audioBuffer.copyFromChannel(anotherArray, channel, 0);
+          newAudioBuffer.copyToChannel(anotherArray, channel, offset);
+        }
+        encoder.encode([newAudioBuffer.getChannelData(0), newAudioBuffer.getChannelData(1)]);
+        arrayBuffer = encoder.mp3Buffers[encoder.mp3Buffers.length - 1];
+        console.log("clip success");
+      }
     }
   </script>
 </body>
