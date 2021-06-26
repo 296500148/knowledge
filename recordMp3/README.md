@@ -9,3 +9,7 @@
 
 推荐启动本地服务插件:
 [anywhere](https://www.npmjs.com/package/anywhere)
+
+> npm i -g anywhere
+
+>anywhere -d 目录 -p 端口号
