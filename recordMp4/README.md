@@ -8,6 +8,19 @@
 
 getUserMedia获取用户设备流 -> MediaRecord录制(因为Chrome不支持直接录制mp4,所以只能先录制成webm格式) -> 最后使用ffmpeg转码成Mp4
 
+![img](./process.jpg)
+
+
+## demo启动
+
+因为涉及到摄像头和麦克风,所以需要起https的服务
+
+推荐启动本地服务插件:
+[anywhere](https://www.npmjs.com/package/anywhere)
+
+> npm i -g anywhere
+
+>anywhere -d 目录 -p 端口号
 ## 额外说明
 
 ffmpeg-asm是有人把代码转成了js的形式
