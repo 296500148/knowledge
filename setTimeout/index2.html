@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mutil</title>
+</head>
+<body>
+    <div id="log"></div>
+    <script>
+        window.addEventListener("load", function () {
+            var log = document.getElementById("log");
+            console.log = function (arg) {
+                log.innerHTML += arg + "<br/>";
+            }
+            setTimeout(() => {
+                setTimeout(() => {
+                    setTimeout(() => {
+                        setTimeout(() => {
+                            setTimeout(() => console.log(5), 5);
+                            setTimeout(() => console.log(4), 4);
+                            setTimeout(() => console.log(3), 3);
+                            setTimeout(() => console.log(2), 2);
+                            setTimeout(() => console.log(1), 1);
+                            setTimeout(() => console.log(0), 0);
+                            //4 3 2 1 0 5 chrome嵌套>=5层时,代表最小延时是4ms。具体嵌套层级的阈值不同浏览器也不一致，HTML Standard 当中是 >5，chrome 当中是 >=5。
+                        }, 0)
+                    }, 0)
+                }, 0)
+            }, 0)
+        })
+    </script>
+</body>
+</html>
